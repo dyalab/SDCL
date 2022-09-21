@@ -6,13 +6,16 @@
 7. NLOPT, https://nlopt.readthedocs.io/en/latest/, for solving optimization problems. 
 
 Build:
+
  ```mkdir build```
  
  ```cd build```
  
  ```cmake ..```
+ 
  ```make```
 
 Run:
 ```./RunSDCL <scene_number> <timeout-limit> <use_training> <use_Gaussian>```
+
 e.g. ```./RunSDCL 2 100 True True```
