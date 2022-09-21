@@ -1,0 +1,275 @@
+/* light_source 0,10,-5 */
+def rad 0.05; // Link radius
+def len0 1;      // upper arm length
+def len1 1.1;      // forearm length
+def r 1.618;     // a ratio
+/* Define classes for robot parts */
+class link {
+    shape cylinder;
+    radius rad;
+    color [.5, .5, .5];
+    specular [2, 2, 2];
+}
+class link2 {
+    shape cylinder;
+    radius rad*1.2;
+    color [.5, .5, .5];
+    specular [2, 2, 2];
+}
+class joint_style {
+    color [0, 0, 0];
+    specular [.5, .5, .5];
+}
+/* Draw the grid */
+frame grid {
+translation [0, 0, 0];
+//    geometry {
+//        shape grid;
+//        delta [.1, .1];
+//        thickness .005;
+//        dimension [100, 100];
+//    }
+}
+/* Draw the robot */
+
+def l1 0.7;
+def l2 0.7;
+// Shoulder
+frame s0 {
+    parent grid;
+    type revolute;  # frame type: revolute joint
+    axis [0, 0, 1]; # joint axis
+    geometry {
+        isa link_style; # instance of joint_style class
+        shape cylinder;
+        radius r*rad;
+        height r*rad*8;
+    }
+}
+
+frame s1 {
+    parent s0;
+    type revolute;  # frame type: revolute joint
+    axis [0, 1, 0]; # joint axis
+    translation [0, 0, r*rad*8];
+    frame s1-joint {
+        rpy [pi/2, 0, 0];
+        translation [0, r*rad, 0];
+        geometry {
+            isa joint_style;
+            shape cylinder;
+            height 2*rad*r;
+            radius r*rad;
+        }
+    }
+    frame s1-link {
+        rpy  [0, 0, 0];
+        geometry {
+            isa link;
+            height l1/2;
+        }
+    }
+}
+
+frame s2 {
+    parent s1;
+    type revolute;  # frame type: revolute joint
+    axis [0, 0, 1]; # joint axis
+    translation [0, 0, l1/2];
+    frame s2-joint {
+        rpy [0, 0, 0];
+        translation [0, 0, -rad*r];
+        geometry {
+            isa joint_style;
+            shape cylinder;
+            height 2*rad*r;
+            radius r*rad;
+        }
+    }
+    frame s2-link {
+        rpy  [0, 0, 0];
+        geometry {
+            isa link;
+            height l1/2;
+        }
+    }
+}
+
+// Elbow
+frame e {
+    parent s2;
+    type revolute;
+    axis [0,1,0];
+    translation [0, 0, l1/2];
+    frame e-joint {
+        rpy [pi/2, 0, 0];
+        translation [0, rad, 0];
+        geometry {
+            isa joint_style;
+            shape cylinder;
+            height 2*rad;
+            radius r*rad;
+        }
+    }
+    frame e-link {
+        rpy [0, 0, 0];
+        geometry {
+            isa link;
+            height l2;
+        }
+    }
+}
+
+frame w0 {
+    parent e;
+    type revolute;  # frame type: revolute joint
+    axis [0, 0, 1]; # joint axis
+    translation [0, 0, l2/2];
+    frame w0-joint {
+        rpy [0, 0, 0];
+        translation [0, 0, -rad*r];
+        geometry {
+            isa joint_style;
+            shape cylinder;
+            height 2*rad*r;
+            radius r*rad;
+        }
+    }
+    frame w0-link {
+        rpy  [0, 0, 0];
+        geometry {
+            isa link;
+            height l2/2;
+        }
+    }
+}
+
+frame w1 {
+    parent w0;
+    type revolute;
+    axis [0,1,0];
+    translation [0, 0, l2/2];
+    frame w1-joint {
+        rpy [pi/2, 0, 0];
+        translation [0, rad, 0];
+        geometry {
+            isa joint_style;
+            shape cylinder;
+            height 2*rad;
+            radius r*rad;
+        }
+    }
+    frame w1-link {
+        rpy [0, 0, 0];
+        geometry {
+            isa link;
+            height l2/2;
+        }
+    }
+}
+
+frame w2 {
+    parent w1;
+    type revolute;
+    axis [0,0,1];
+    translation [0, 0, l2/2];
+    frame end-link {
+        // rpy [pi/2, 0, 0];
+        translation [0, 0, 0];
+        geometry {
+        isa joint_style; # instance of joint_style class
+        shape box;
+        dimension [0.12,0.12,0.2];
+        }
+    }
+
+}
+
+# obstacles
+def h 1;  // box height
+def y 0.0; 
+def x 0.1; 
+def z 0.2;
+class block {
+      alpha 0.5;
+}
+class red { color [1,0,0]; }
+
+
+def inch 0.05;
+def shelf-length 15*inch;
+def shelf-width  20*inch;
+def shelf-depth  10*inch;
+def shelf-thickness 1*inch;
+
+frame shelf-base{
+    parent grid;
+    translation [0.0, 0.0, 0.2];
+}
+frame shelf-back{
+      parent shelf-base;
+      translation [0, -20*inch, shelf-length/2];
+}
+class shelf {
+      shape box;
+      isa surface;
+      color [0.23,0.39,0.39];
+      alpha 1;
+      visual 1;
+}
+
+class item {
+      color [1,0,0];
+      shape cylinder;
+      radius r*rad/2;
+      height r*rad*5;
+}
+
+def move 0.2;
+frame shelf-left{
+      parent shelf-back;
+      translation [-shelf-width/2, shelf-depth/2, -move/2];
+      geometry {
+               isa shelf;
+               dimension [shelf-thickness, shelf-depth, shelf-length+move];
+      }
+}
+frame shelf-top{
+      parent shelf-back;
+      translation [0, shelf-depth/2, shelf-length/2];
+      geometry {
+               isa shelf;
+               dimension [shelf-width + shelf-thickness, shelf-depth , shelf-thickness];
+      }
+}
+frame shelf-right{
+      parent shelf-back;
+      translation [shelf-width/2, shelf-depth/2, -move/2];
+      geometry {
+               isa shelf;
+               dimension [shelf-thickness, shelf-depth, shelf-length+move];
+      }
+}
+frame shelf-middle{
+      parent shelf-back;
+      translation [0, shelf-depth/2, -shelf-length/8];
+      geometry {
+               isa shelf;
+               dimension [shelf-width, shelf-depth, shelf-thickness];
+      }
+}
+frame item1{
+    parent shelf-middle;
+    translation [-0.12, 0, 0];
+    geometry {
+        isa item;
+    }
+}
+
+frame item2{
+    parent shelf-middle;
+    translation [0.12, 0, 0];
+    geometry {
+        isa item;
+    }
+}

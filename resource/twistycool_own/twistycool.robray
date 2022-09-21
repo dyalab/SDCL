@@ -1,0 +1,311 @@
+/* light_source 0,10,-5 */
+def w 6;  // block width
+def h 3;  // block height
+def thick 0.1; // block thickness
+def pw 1.2; // passage width and height
+def ph 0.6; // passage height   1.2 * 0.8, 1.2 * 0.6, 1.0 * 0.8, 1.0 * 0.6 plan exists.
+def delta 0.2; // make sure there is collision
+
+frame grid {
+translation [0, 0, 0];
+    geometry {
+        shape grid;
+        delta [.1, .1];
+        thickness .005;
+        dimension [3, 3];
+    }
+}
+
+/* Define the block */
+class block-style {
+    shape box;
+    color [.5, .5, .5];
+    specular [.5, .5, .5];
+}
+
+frame block {
+    type fixed;
+    translation [0, 0, 0];
+    frame block-bottom {
+        translation [0, 0, (h - ph)/4];
+        geometry {
+            isa block-style;
+            dimension [w, thick, (h - ph)/2];
+        }
+    }
+
+    frame block-top {
+        translation [0, 0, (h - ph)/2 + ph + (h - ph)/4];
+        geometry {
+            isa block-style;
+            dimension [w, thick, (h - ph)/2];
+        }
+    }
+
+    frame block-right {
+        translation [(w - pw)/4 + pw/2, 0, (h - ph)/2 + ph/2];
+        geometry {
+            isa block-style;
+            dimension [(w - pw)/2, thick, ph + delta];
+        }
+    }
+
+    frame block-left {
+        translation [-(w - pw)/4 - pw/2, 0, (h - ph)/2 + ph/2];
+        geometry {
+            isa block-style;
+            dimension [(w - pw)/2, thick, ph + delta];
+        }
+    }
+}
+
+/* links */
+frame p1 {
+    type prismatic;
+    axis [1.0, 0.0, 0.0];
+}
+
+frame p2 {
+    parent p1;
+    type prismatic;
+    axis [0.0, 1.0, 0.0];
+}
+
+frame p3 {
+    parent p2;
+    type prismatic;
+    axis [0.0, 0.0, 1.0];
+}
+
+frame r1 {
+    parent p3;
+    type revolute;
+    axis [1.0, 0.0, 0.0];
+}
+
+frame r2 {
+    parent r1;
+    type revolute;
+    axis [0.0, 1.0, 0.0];
+}
+
+frame r3 {
+    parent r2;
+    type revolute;
+    axis [0.0, 0.0, 1.0];
+}
+
+
+
+/* Define the robot */
+def rw 0.3; // link width
+def rl 1; // robot link length
+
+class robot-style {
+    shape box;
+    color [1, 0, 0];
+}
+
+frame robot {
+    parent r3;
+    type fixed;
+    translation [0, 0, 0];
+    frame l1 {
+        translation [0, 0, 0];
+        geometry {
+            isa robot-style;
+            dimension [rl, rw, rw];
+        }
+    }
+    frame l2 {
+        translation [rl/2, 0, rl/2 - rw/2];
+        geometry {
+            isa robot-style;
+            dimension [rw, rw, rl];
+        }
+
+    }
+    frame l3 {
+        translation [-rl/2, rl/2 - rw/2, 0];
+        geometry {
+            isa robot-style;
+            dimension [rw, rl, rw];
+        }
+    }
+}
+
+
+// /* Define classes for robot parts */
+// class link {
+//     shape cylinder;
+//     radius rad;
+//     color [.5, .5, .5];
+//     specular [2, 2, 2];
+// }
+// class joint_style {
+//     color [0, 0, 0];
+//     specular [.5, .5, .5];
+// }
+// /* Draw the grid */
+// frame grid {
+// translation [0, 0, 0];
+// //    geometry {
+// //        shape grid;
+// //        delta [.1, .1];
+// //        thickness .005;
+// //        dimension [10, 10];
+// //    }
+// }
+// /* Draw the robot */
+// // translation
+// frame p0 {
+//     parent grid;
+//     type prismatic; 
+//     axis [1, 0, 0];
+// }
+// frame p1 {
+//     parent p0;
+//     type prismatic;
+//     axis [0, 1, 0];
+// }
+// frame p2 {
+//     parent p1;
+//     type prismatic;
+//     axis [0, 0, 1];
+// }
+// 
+// // rotation
+// frame s0 {
+//     parent p2;
+//     type revolute; 
+//     axis [1, 0, 0];
+// }
+// 
+// frame s1 {
+//     parent s0;
+//     type revolute; 
+//     axis [0, 1, 0];
+// }
+// 
+// frame ee {
+// parent s1;
+// rpy [0, 0, 0];
+// translation [0, 0, 0];
+// geometry {
+//     isa link_style;
+//     shape cylinder;
+//     height l;
+//     radius  r;
+// }
+// }
+// 
+// # obstacles
+// def h_o 3;  // box outside height
+// def h_i 2.6; // box inside height
+// def io_diff 0.2; 
+// def delta 0.1;
+// def hole 0.45; // hole size
+// class block {
+//       alpha 0.6;
+// }
+// class red { color [1,0,0]; }
+// 
+// frame BOX1 {
+//       parent grid;
+//       translation [0,  0, (h_i + io_diff)/2];
+//       geometry {
+//                shape box;
+//                isa block;
+//                isa red;
+//                dimension [h_o, h_o, io_diff];
+//       }
+// }
+// 
+// 
+// frame BOX2 {
+//       parent grid;
+//       translation [0,  0, -(h_i + io_diff)/2];
+//       geometry {
+//                shape box;
+//                isa block;
+//                isa red;
+//                dimension [h_o, h_o, io_diff];
+//       }
+// }
+// 
+// frame BOX3 {
+//       parent grid;
+//       translation [(h_i + io_diff)/2,  0, 0];
+//       geometry {
+//                shape box;
+//                isa block;
+//                isa red;
+//                dimension [io_diff+delta, h_o, h_i+delta];
+//       }
+// }
+// 
+// frame BOX4 {
+//       parent grid;
+//       translation [-(h_i + io_diff)/2,  0, 0];
+//       geometry {
+//                shape box;
+//                isa block;
+//                isa red;
+//                dimension [io_diff+delta, h_o, h_i+delta];
+//       }
+// }
+// 
+// frame BOX5 {
+//       parent grid;
+//       translation [0, (h_i + io_diff)/2, 0];
+//       geometry {
+//                shape box;
+//                isa block;
+//                isa red;
+//                dimension [h_i, io_diff, h_i];
+//       }
+// }
+// 
+// frame BOX6 {
+//       parent grid;
+//       translation [0, -(h_i + io_diff)/2, (h_i - io_diff)/4+hole/2];
+//       geometry {
+//                shape box;
+//                isa block;
+//                isa red;
+//                dimension [h_i, io_diff, (h_i - io_diff)/2 + delta];
+//       }
+// }
+// 
+// frame BOX7 {
+//       parent grid;
+//       translation [0, -(h_i + io_diff)/2, -(h_i - io_diff)/4-hole/2];
+//       geometry {
+//                shape box;
+//                isa block;
+//                isa red;
+//                dimension [h_i, io_diff, (h_i - io_diff)/2 + delta];
+//       }
+// }
+// 
+// frame BOX8 {
+//       parent grid;
+//       translation [(h_i - io_diff)/4+hole/2, -(h_i + io_diff)/2, 0];
+//       geometry {
+//                shape box;
+//                isa block;
+//                isa red;
+//                dimension [(h_i - io_diff)/2, io_diff, hole+delta];
+//       }
+// }
+// 
+// frame BOX9 {
+//       parent grid;
+//       translation [-(h_i - io_diff)/4-hole/2, -(h_i + io_diff)/2, 0];
+//       geometry {
+//                shape box;
+//                isa block;
+//                isa red;
+//                dimension [(h_i - io_diff)/2, io_diff, hole+delta];
+//       }
+// }
